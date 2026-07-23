@@ -73,3 +73,4 @@ timeout, retry, failover, API administrativa e o fluxo end-to-end.
 
 A API administrativa não executa métodos de domínio; as invocações remotas usam
 exclusivamente o protocolo TCP do ORB.
+a
