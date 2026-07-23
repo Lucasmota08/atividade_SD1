@@ -1,0 +1,5 @@
+PyJWT
+fastapi
+uvicorn
+pytest
+python-dotenv

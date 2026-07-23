@@ -1,0 +1,67 @@
+services:
+  registry:
+    build: .
+    command: python -m registry_service.main
+    environment:
+      REGISTRY_PORT: 8765
+    ports:
+      - "8765:8765"
+
+  node_1:
+    build: .
+    command: python -m server.node_1
+    depends_on:
+      - registry
+    environment:
+      JWT_SECRET: local-compose-secret
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: 8765
+      NODE_1_HOST: 0.0.0.0
+      NODE_1_PORT: 9001
+      NODE_1_ADVERTISE_HOST: host.docker.internal
+      NODE_1_DB: /data/biblioteca_node1.db
+      LOG_FILE: /logs/node1.log
+    ports:
+      - "9001:9001"
+    volumes:
+      - node1-data:/data
+      - logs:/logs
+
+  node_2:
+    build: .
+    command: python -m server.node_2
+    depends_on:
+      - registry
+    environment:
+      JWT_SECRET: local-compose-secret
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: 8765
+      NODE_2_HOST: 0.0.0.0
+      NODE_2_PORT: 9002
+      NODE_2_ADVERTISE_HOST: host.docker.internal
+      NODE_2_DB: /data/biblioteca_node2.db
+      LOG_FILE: /logs/node2.log
+    ports:
+      - "9002:9002"
+    volumes:
+      - node2-data:/data
+      - logs:/logs
+
+  admin_api:
+    build: .
+    command: uvicorn admin_api.main:app --host 0.0.0.0 --port 8000
+    depends_on:
+      - registry
+    environment:
+      REGISTRY_HOST: registry
+      REGISTRY_PORT: 8765
+      LOG_FILE: /logs/node1.log
+    ports:
+      - "8000:8000"
+    volumes:
+      - logs:/logs
+
+volumes:
+  node1-data:
+  node2-data:
+  logs:
