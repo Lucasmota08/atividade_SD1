@@ -18,7 +18,7 @@ services:
       REGISTRY_PORT: 8765
       NODE_1_HOST: 0.0.0.0
       NODE_1_PORT: 9001
-      NODE_1_ADVERTISE_HOST: host.docker.internal
+      NODE_1_ADVERTISE_HOST: 127.0.0.1
       NODE_1_DB: /data/biblioteca_node1.db
       LOG_FILE: /logs/node1.log
     ports:
@@ -38,7 +38,7 @@ services:
       REGISTRY_PORT: 8765
       NODE_2_HOST: 0.0.0.0
       NODE_2_PORT: 9002
-      NODE_2_ADVERTISE_HOST: host.docker.internal
+      NODE_2_ADVERTISE_HOST: 127.0.0.1
       NODE_2_DB: /data/biblioteca_node2.db
       LOG_FILE: /logs/node2.log
     ports:
