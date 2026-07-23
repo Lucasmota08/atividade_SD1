@@ -9,6 +9,7 @@ conhecer a localização física dos objetos.
 
 - Python 3.11+
 - Docker e Docker Compose
+- Todas as bibliotecas do requirements.txt
 
 ## Executar com Docker Compose
 
