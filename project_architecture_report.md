@@ -68,3 +68,34 @@ Abaixo é descrito o caminho que uma chamada de método faz, por exemplo: `await
 4.  **Processamento no Broker:** O Broker do nó recebe os bytes, reconstrói o JSON usando o tamanho indicado no cabeçalho e valida o JWT se o método for protegido.
 5.  **Execução no Skeleton:** O Skeleton invoca localmente a classe `LivroService` no banco de dados SQLite do nó e obtém a lista de livros do banco.
 6.  **Retorno da Resposta:** O resultado é empacotado de volta pelo Broker no mesmo formato TCP enquadrado e enviado para o Stub, que o entrega de forma transparente como o retorno da função assíncrona do Python para o código cliente.
+
+---
+
+## 4. Proposta de Arquitetura na Nuvem (AWS - Grupo 6)
+
+Para atender ao **Requisito 10 (Integração com AWS - Comunicação entre Serviços Distribuídos)**, a proposta mapeia o projeto local para **4 serviços básicos e clássicos da AWS**:
+
+```mermaid
+graph TD
+    Client[Cliente / App] -->|Requisição TCP| NLB[Network Load Balancer]
+    NLB -->|Distribui Chamadas| EC2[Servidores AWS EC2 / Docker]
+    EC2 <-->|Descoberta de Nós| CloudMap[AWS Cloud Map / Registry]
+    EC2 -->|Salva Dados| RDS[(Amazon RDS / Banco Relacional)]
+    EC2 -.->|Guarda Logs| CloudWatch[AWS CloudWatch Logs]
+```
+
+### Mapeamento Direto e Simples
+
+1. **AWS EC2 (ou ECS)**: Roda os contêineres Docker do nosso **Broker** e dos nossos nós de servidor (`node_1` e `node_2`).
+2. **AWS Cloud Map**: Substitui o nosso `registry_service` local, funcionando como a "lista telefônica" na nuvem para que os nós e clientes se localizem.
+3. **AWS Network Load Balancer (NLB)**: Recebe as conexões TCP do cliente e distribui entre os nós do servidor.
+4. **Amazon RDS**: Substitui o banco de dados SQLite local por um banco relacional gerenciado na nuvem.
+5. **AWS CloudWatch**: Armazena o arquivo de logs (`orb.log`) e métricas do sistema.
+
+---
+
+## 5. Conclusão
+
+A solução na nuvem substitui os componentes locais por serviços equivalentes da AWS, mantendo a comunicação distribuída entre o cliente e os nós do servidor de forma simples, escalável e segura.
+
+
