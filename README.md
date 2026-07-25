@@ -24,10 +24,16 @@ Serviços:
 - Nó 2: `localhost:9002`
 - API administrativa: `http://localhost:8000/docs`
 
-Em outro terminal, execute o cliente:
+Em outro terminal, execute o cliente automático de demonstração:
 
 ```text
 python -m client.cliente_exemplo
+```
+
+Ou execute o **CLI interativo** para navegar pelas opções do menu no console:
+
+```text
+python -m client.cli
 ```
 
 Credenciais seed: `ana@example.com` / `senha123` e `bruno@example.com` /
