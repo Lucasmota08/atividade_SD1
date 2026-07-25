@@ -20,7 +20,7 @@ def seed_database(db_path: str) -> None:
     connection = get_connection(db_path)
     try:
         connection.execute("BEGIN")
-        for index in range(1, 6):
+        for index in range(1, 3):
             connection.execute(
                 "INSERT OR IGNORE INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?)",
                 (f"livro-{index:03d}", f"Livro de Demonstração {index}", "Autor ORB", f"isbn-{index:03d}", 2),

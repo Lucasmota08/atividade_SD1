@@ -29,6 +29,8 @@ class Broker:
             "listarEmprestimosAtivos",
             "consultarDisponibilidade",
             "listarLivros",
+            "adicionarLivro",
+            "excluirLivro",
         }
         self.skeleton = Skeleton()
         configure_logging()

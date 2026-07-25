@@ -19,7 +19,7 @@ services:
       NODE_1_HOST: 0.0.0.0
       NODE_1_PORT: 9001
       NODE_1_ADVERTISE_HOST: 127.0.0.1
-      NODE_1_DB: /data/biblioteca_node1.db
+      NODE_1_DB: /data/biblioteca_compartilhada.db
       LOG_FILE: /logs/node1.log
     ports:
       - "9001:9001"
@@ -39,12 +39,12 @@ services:
       NODE_2_HOST: 0.0.0.0
       NODE_2_PORT: 9002
       NODE_2_ADVERTISE_HOST: 127.0.0.1
-      NODE_2_DB: /data/biblioteca_node2.db
+      NODE_2_DB: /data/biblioteca_compartilhada.db
       LOG_FILE: /logs/node2.log
     ports:
       - "9002:9002"
     volumes:
-      - node2-data:/data
+      - node1-data:/data
       - logs:/logs
 
   admin_api:

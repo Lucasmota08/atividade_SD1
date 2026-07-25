@@ -45,3 +45,36 @@ class LivroService:
             return {"disponivel": copies > 0, "copias": copies}
         finally:
             connection.close()
+
+    def adicionarLivro(self, livro_id: str, titulo: str, autor: str, isbn: str, copias: int) -> dict[str, Any]:
+        """Adiciona um novo livro ao catálogo."""
+        connection = get_connection(self.db_path)
+        try:
+            connection.execute(
+                "INSERT INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?)",
+                (livro_id, titulo, autor, isbn, copias)
+            )
+            connection.commit()
+            return {"status": "success", "id": livro_id}
+        except Exception as exc:
+            connection.rollback()
+            raise exc
+        finally:
+            connection.close()
+
+    def excluirLivro(self, livro_id: str) -> dict[str, Any]:
+        """Exclui um livro do catálogo pelo ID."""
+        connection = get_connection(self.db_path)
+        try:
+            row = connection.execute("SELECT id FROM livro WHERE id = ?", (livro_id,)).fetchone()
+            if row is None:
+                raise ObjectNotFoundError(f"Livro '{livro_id}' não encontrado")
+            connection.execute("DELETE FROM livro WHERE id = ?", (livro_id,))
+            connection.commit()
+            return {"status": "success", "message": f"Livro {livro_id} excluído com sucesso."}
+        except Exception as exc:
+            connection.rollback()
+            raise exc
+        finally:
+            connection.close()
+
