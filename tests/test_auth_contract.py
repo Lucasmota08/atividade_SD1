@@ -3,5 +3,5 @@ from orb_core.auth import validar_token
 
 
 def test_auth_service_returns_valid_jwt(database_path):
-    token = UsuarioService(database_path).autenticar("ana@example.com", "senha123")
+    token = UsuarioService(database_path).autenticar("admin@gmail.com", "admin")
     assert validar_token(token)["sub"] == "usuario-001"

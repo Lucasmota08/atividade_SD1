@@ -20,16 +20,18 @@ def seed_database(db_path: str) -> None:
     connection = get_connection(db_path)
     try:
         connection.execute("BEGIN")
-        for index in range(1, 3):
+        for index in range(1, 2):
             connection.execute(
                 "INSERT OR IGNORE INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?)",
                 (f"livro-{index:03d}", f"Livro de Demonstração {index}", "Autor ORB", f"isbn-{index:03d}", 2),
             )
-        users = (("usuario-001", "Ana", "ana@example.com"), ("usuario-002", "Bruno", "bruno@example.com"))
+        users = (("usuario-001", "Admin", "admin@gmail.com"), ("usuario-002", "Bruno", "bruno@example.com"))
         for user_id, name, email in users:
+            senha = "admin" if email == "admin@gmail.com" else "senha123"
             connection.execute(
-                "INSERT OR IGNORE INTO usuario(id, nome, email, senha_hash, status) VALUES (?, ?, ?, ?, 'ativo')",
-                (user_id, name, email, hash_password("senha123")),
+                "INSERT INTO usuario(id, nome, email, senha_hash, status) VALUES (?, ?, ?, ?, 'ativo') "
+                "ON CONFLICT(id) DO UPDATE SET nome=excluded.nome, email=excluded.email, senha_hash=excluded.senha_hash",
+                (user_id, name, email, hash_password(senha)),
             )
         connection.commit()
     except Exception:

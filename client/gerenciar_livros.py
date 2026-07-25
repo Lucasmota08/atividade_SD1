@@ -22,7 +22,7 @@ async def main() -> None:
     
     try:
         print("Autenticando...")
-        token = await usuario.invoke_async("autenticar", "ana@example.com", "senha123")
+        token = await usuario.invoke_async("autenticar", "admin@gmail.com", "admin")
         print("Autenticado com sucesso!\n")
     except ORBError as exc:
         print(f"Erro ao autenticar [{exc.code}]: {exc.message}")

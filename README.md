@@ -36,7 +36,7 @@ Ou execute o **CLI interativo** para navegar pelas opções do menu no console:
 python -m client.cli
 ```
 
-Credenciais seed: `ana@example.com` / `senha123` e `bruno@example.com` /
+Credenciais seed: `admin@gmail.com` / `admin` e `bruno@example.com` /
 `senha123`.
 
 ## Executar localmente

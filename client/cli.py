@@ -50,22 +50,25 @@ async def main() -> None:
             break
 
         if opcao == "1":
-            email = input("Digite o email (ex: ana@example.com): ").strip()
-            senha = input("Digite a senha (ex: senha123): ").strip()
+            email = input("Digite o email: ").strip()
+            senha = input("Digite a senha: ").strip()
             try:
                 token = await usuario_stub.invoke_async("autenticar", email, senha)
-                usuario_id = "usuario-001" if "ana" in email else "usuario-002"
+                usuario_id = "usuario-001" if ("admin" in email or "ana" in email) else "usuario-002"
                 print(f"\n✅ Login realizado com sucesso!")
                 print(f"Token JWT obtido: {token[:30]}...")
             except ORBError as exc:
                 print(f"\n❌ Erro na autenticação [{exc.code}]: {exc.message}")
 
         elif opcao == "2":
+            if not token:
+                print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
+                continue
             nome = input("Nome completo: ").strip()
             email = input("Email: ").strip()
             senha = input("Senha: ").strip()
             try:
-                res = await usuario_stub.invoke_async("cadastrarUsuario", nome, email, senha)
+                res = await usuario_stub.invoke_async("cadastrarUsuario", nome, email, senha, auth_token=token)
                 print(f"\n✅ Usuário cadastrado com sucesso! ID: {res.get('id')}")
             except ORBError as exc:
                 print(f"\n❌ Erro no cadastro [{exc.code}]: {exc.message}")
