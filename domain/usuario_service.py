@@ -25,10 +25,18 @@ class UsuarioService:
 
     def cadastrarUsuario(self, nome: str, email: str, senha: str) -> dict[str, Any]:
         """Cadastra um usuário ativo e não retorna sua senha."""
-        user_id = str(uuid.uuid4())
         connection = get_connection(self.db_path)
         try:
             connection.execute("BEGIN")
+            cursor = connection.execute("SELECT id FROM usuario WHERE id LIKE 'usuario-%'")
+            existing_nums = []
+            for row in cursor.fetchall():
+                parts = str(row["id"]).split("-")
+                if len(parts) == 2 and parts[1].isdigit():
+                    existing_nums.append(int(parts[1]))
+            next_num = max(existing_nums, default=0) + 1
+            user_id = f"usuario-{next_num:03d}"
+
             connection.execute(
                 "INSERT INTO usuario(id, nome, email, senha_hash, status) VALUES (?, ?, ?, ?, 'ativo')",
                 (user_id, nome, email, self._hash(senha)),
@@ -64,3 +72,13 @@ class UsuarioService:
             return gerar_token(row["id"])
         finally:
             connection.close()
+
+    def listarUsuarios(self) -> list[dict[str, Any]]:
+        """Lista todos os usuários cadastrados sem expor o hash da senha."""
+        connection = get_connection(self.db_path)
+        try:
+            cursor = connection.execute("SELECT id, nome, email, status FROM usuario")
+            return [dict(row) for row in cursor.fetchall()]
+        finally:
+            connection.close()
+

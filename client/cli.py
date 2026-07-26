@@ -3,12 +3,26 @@
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime
 import os
 import sys
+
+import jwt
 
 from orb_core.exceptions import ORBError
 from orb_core.registry import RegistryClient
 from orb_core.stub import Stub
+
+
+def format_date(iso_str: str | None) -> str:
+    """Format de datas ISO8601 em exibição amigável para o usuário (ex: DD/MM/AAAA às HH:MM)."""
+    if not iso_str:
+        return "-"
+    try:
+        dt = datetime.fromisoformat(str(iso_str).replace("Z", "+00:00"))
+        return dt.strftime("%d/%m/%Y às %H:%M")
+    except Exception:
+        return str(iso_str).split(".")[0].replace("T", " ")
 
 
 async def main() -> None:
@@ -29,51 +43,77 @@ async def main() -> None:
     print(f"Conectando ao Registry em {registry_host}:{registry_port}...\n")
 
     while True:
-        status_str = f"Autenticado (User: {usuario_id})" if token else "Não Autenticado"
+        status_str = f"Autenticado como [{usuario_id}]" if token else "Não Autenticado"
         print("\n" + "-" * 60)
-        print(f"Status Atual: [{status_str}]")
+        print(f"Status Atual: {status_str}")
         print("-" * 60)
-        print("1. Autenticar (Login)")
-        print("2. Cadastrar Novo Usuário")
-        print("3. Listar Todos os Livros")
-        print("4. Consultar Disponibilidade de um Livro")
-        print("5. Realizar Empréstimo de Livro")
-        print("6. Listar Meus Empréstimos Ativos")
-        print("7. Devolver Livro")
-        print("8. Sair")
+
+        if not token:
+            print("1. Autenticar / Criar Nova Conta")
+        else:
+            print("1. Desconectar (Sair da Conta)")
+
+        print("2. Listar Todos os Livros")
+        print("3. Consultar Disponibilidade de um Livro")
+        print("4. Realizar Empréstimo de Livro")
+        print("5. Listar Meus Empréstimos Ativos")
+        print("6. Devolver Livro")
+        print("7. Sair")
         print("-" * 60)
 
         try:
-            opcao = input("Escolha uma opção (1-8): ").strip()
+            opcao = input("Escolha uma opção (1-7): ").strip()
         except (EOFError, KeyboardInterrupt):
             print("\nEncerrando cliente.")
             break
 
         if opcao == "1":
-            email = input("Digite o email: ").strip()
-            senha = input("Digite a senha: ").strip()
-            try:
-                token = await usuario_stub.invoke_async("autenticar", email, senha)
-                usuario_id = "usuario-001" if ("admin" in email or "ana" in email) else "usuario-002"
-                print(f"\n✅ Login realizado com sucesso!")
-                print(f"Token JWT obtido: {token[:30]}...")
-            except ORBError as exc:
-                print(f"\n❌ Erro na autenticação [{exc.code}]: {exc.message}")
+            if token:
+                print(f"\n✅ Usuário [{usuario_id}] desconectado com sucesso.")
+                token = None
+                usuario_id = None
+                continue
+
+            print("\n--- AUTENTICAÇÃO / NOVO CADASTRO ---")
+            print("1. Fazer Login (Autenticar)")
+            print("2. Criar Nova Conta (Cadastrar Usuário)")
+            print("3. Voltar")
+            sub_op = input("Escolha uma opção (1-3): ").strip()
+
+            if sub_op == "1":
+                email = input("Email: ").strip()
+                senha = input("Senha: ").strip()
+                try:
+                    token = await usuario_stub.invoke_async("autenticar", email, senha)
+                    payload = jwt.decode(token, options={"verify_signature": False})
+                    usuario_id = str(payload.get("sub", ""))
+                    print(f"\n✅ Login realizado com sucesso!")
+                    print(f"   ID do Usuário: {usuario_id}")
+                    print(f"   Token JWT obtido: {token[:30]}...")
+                except ORBError as exc:
+                    print(f"\n❌ Erro na autenticação [{exc.code}]: {exc.message}")
+
+            elif sub_op == "2":
+                nome = input("Nome completo: ").strip()
+                email = input("Email: ").strip()
+                senha = input("Senha: ").strip()
+                try:
+                    res = await usuario_stub.invoke_async("cadastrarUsuario", nome, email, senha)
+                    new_id = res.get("id")
+                    print(f"\n✅ Usuário cadastrado com sucesso!")
+                    print(f"   SEU ID DE USUÁRIO É: {new_id}")
+                    # Inicia a sessão automaticamente com a conta criada
+                    try:
+                        token = await usuario_stub.invoke_async("autenticar", email, senha)
+                        payload = jwt.decode(token, options={"verify_signature": False})
+                        usuario_id = str(payload.get("sub", new_id))
+                        print(f"   ✅ Sessão iniciada automaticamente como [{usuario_id}]!")
+                    except Exception:
+                        pass
+                except ORBError as exc:
+                    print(f"\n❌ Erro no cadastro [{exc.code}]: {exc.message}")
 
         elif opcao == "2":
-            if not token:
-                print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
-                continue
-            nome = input("Nome completo: ").strip()
-            email = input("Email: ").strip()
-            senha = input("Senha: ").strip()
-            try:
-                res = await usuario_stub.invoke_async("cadastrarUsuario", nome, email, senha, auth_token=token)
-                print(f"\n✅ Usuário cadastrado com sucesso! ID: {res.get('id')}")
-            except ORBError as exc:
-                print(f"\n❌ Erro no cadastro [{exc.code}]: {exc.message}")
-
-        elif opcao == "3":
             if not token:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
@@ -85,7 +125,7 @@ async def main() -> None:
             except ORBError as exc:
                 print(f"\n❌ Erro ao listar livros [{exc.code}]: {exc.message}")
 
-        elif opcao == "4":
+        elif opcao == "3":
             if not token:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
@@ -97,34 +137,35 @@ async def main() -> None:
             except ORBError as exc:
                 print(f"\n❌ Erro ao consultar disponibilidade [{exc.code}]: {exc.message}")
 
-        elif opcao == "5":
-            if not token:
+        elif opcao == "4":
+            if not token or not usuario_id:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
-            uid = input(f"ID do Usuário [{usuario_id or 'usuario-001'}]: ").strip() or (usuario_id or "usuario-001")
-            livro_id = input("ID do Livro a emprestar (ex: livro-001): ").strip()
+            print(f"\n📖 Emprestando livro para sua conta [{usuario_id}]...")
+            livro_id = input("Digite o ID do Livro (ex: livro-001): ").strip()
             try:
-                loan = await emprestimo_stub.invoke_async("emprestarLivro", uid, livro_id, auth_token=token)
+                loan = await emprestimo_stub.invoke_async("emprestarLivro", usuario_id, livro_id, auth_token=token)
+                data_formatada = format_date(loan.get("data_devolucao_prevista"))
                 print(f"\n✅ Empréstimo realizado com sucesso!")
-                print(f"   ID Empréstimo: {loan['id']}")
-                print(f"   Devolução prevista: {loan['data_devolucao_prevista']}")
+                print(f"   ID do Empréstimo: {loan['id']}")
+                print(f"   Devolução prevista: {data_formatada}")
             except ORBError as exc:
                 print(f"\n❌ Erro ao emprestar livro [{exc.code}]: {exc.message}")
 
-        elif opcao == "6":
-            if not token:
+        elif opcao == "5":
+            if not token or not usuario_id:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
-            uid = input(f"ID do Usuário [{usuario_id or 'usuario-001'}]: ").strip() or (usuario_id or "usuario-001")
             try:
-                loans = await emprestimo_stub.invoke_async("listarEmprestimosAtivos", uid, auth_token=token)
-                print(f"\n📋 Empréstimos Ativos do usuário {uid} ({len(loans)}):")
+                loans = await emprestimo_stub.invoke_async("listarEmprestimosAtivos", usuario_id, auth_token=token)
+                print(f"\n📋 Meus Empréstimos Ativos ({len(loans)}):")
                 for l in loans:
-                    print(f"  • ID Empréstimo: {l['id']} | Livro ID: {l['livro_id']} | Devolução em: {l['data_devolucao_prevista']}")
+                    data_formatada = format_date(l.get("data_devolucao_prevista"))
+                    print(f"  • ID Empréstimo: {l['id']} | Livro ID: {l['livro_id']} | Devolução em: {data_formatada}")
             except ORBError as exc:
                 print(f"\n❌ Erro ao listar empréstimos [{exc.code}]: {exc.message}")
 
-        elif opcao == "7":
+        elif opcao == "6":
             if not token:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
@@ -135,7 +176,7 @@ async def main() -> None:
             except ORBError as exc:
                 print(f"\n❌ Erro ao devolver livro [{exc.code}]: {exc.message}")
 
-        elif opcao == "8":
+        elif opcao == "7":
             print("\nEncerrando cliente da Biblioteca Digital. Até logo!\n")
             break
         else:

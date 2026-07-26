@@ -18,3 +18,11 @@ def test_user_registration_hides_password(database_path):
     user = service.cadastrarUsuario("Clara", "clara@example.com", "secret")
     assert user["email"] == "clara@example.com"
     assert "senha_hash" not in user
+
+
+def test_user_listing(database_path):
+    service = UsuarioService(database_path)
+    users = service.listarUsuarios()
+    assert len(users) >= 2
+    assert any(u["email"] == "admin@gmail.com" for u in users)
+

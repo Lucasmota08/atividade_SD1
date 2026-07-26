@@ -20,10 +20,17 @@ def seed_database(db_path: str) -> None:
     connection = get_connection(db_path)
     try:
         connection.execute("BEGIN")
-        for index in range(1, 2):
+        books = (
+            ("livro-001", "Volta ao Mundo em 80 Dias", "Julio Verne", "isbn-001", 2),
+            ("livro-002", "Dom Casmurro", "Machado de Assis", "isbn-002", 2),
+            ("livro-003", "O Hobbit", "J.R.R. Tolkien", "isbn-003", 2),
+            ("livro-004", "Ideias Têm Consequências", "Richard Weaver", "isbn-004", 2),
+        )
+        for book_id, titulo, autor, isbn, copias in books:
             connection.execute(
-                "INSERT OR IGNORE INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?)",
-                (f"livro-{index:03d}", f"Livro de Demonstração {index}", "Autor ORB", f"isbn-{index:03d}", 2),
+                "INSERT INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?) "
+                "ON CONFLICT(id) DO UPDATE SET titulo=excluded.titulo, autor=excluded.autor, isbn=excluded.isbn, copias_disponiveis=excluded.copias_disponiveis",
+                (book_id, titulo, autor, isbn, copias),
             )
         users = (("usuario-001", "Admin", "admin@gmail.com"), ("usuario-002", "Bruno", "bruno@example.com"))
         for user_id, name, email in users:

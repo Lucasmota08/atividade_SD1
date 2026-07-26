@@ -9,7 +9,6 @@ conhecer a localização física dos objetos.
 
 - Python 3.11+
 - Docker e Docker Compose
-- Todas as bibliotecas do requirements.txt
 
 ## Executar com Docker Compose
 
@@ -54,7 +53,7 @@ administrativa. Use `.env.example` como referência de configuração.
 ## Testes
 
 ```text
-pytest
+python -m pytest
 ```
 
 A suíte cobre framing, exceções, JWT, Registry, dispatch, domínio, transações,
@@ -69,7 +68,7 @@ timeout, retry, failover, API administrativa e o fluxo end-to-end.
 5. Derrube um nó com `docker stop atividadeSD1-node_2-1` ou pelo nome exibido por `docker compose ps`.
 6. Repita a consulta: o outro nó continua respondendo.
 7. Pare ambos os nós para observar `CONNECTION_REFUSED` tratado.
-8. Execute `pytest tests/test_timeout.py` para demonstrar `TIMEOUT`.
+8. Execute `python -mpytest tests/test_timeout.py` para demonstrar `TIMEOUT`.
 9. Devolva o livro.
 
 ## API administrativa

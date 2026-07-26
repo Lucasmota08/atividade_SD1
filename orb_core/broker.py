@@ -22,8 +22,8 @@ class Broker:
     def __init__(self, objects: dict[str, object] | None = None, protected_methods: set[str] | None = None) -> None:
         self.objects = objects or {}
         self.protected_methods = protected_methods or {
-            "cadastrarUsuario",
             "consultarUsuario",
+            "listarUsuarios",
             "emprestarLivro",
             "devolverLivro",
             "listarEmprestimosAtivos",

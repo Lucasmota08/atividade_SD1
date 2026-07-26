@@ -14,7 +14,7 @@ _ALGORITHM = "HS256"
 
 
 def _secret() -> str:
-    return os.getenv("JWT_SECRET", "local-development-secret")
+    return os.getenv("JWT_SECRET", "local-compose-secret")
 
 
 def gerar_token(usuario_id: str) -> str:

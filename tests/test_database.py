@@ -10,7 +10,7 @@ def test_seed_creates_expected_data(tmp_path):
     path = str(tmp_path / "seed.db")
     seed_database(path)
     connection = get_connection(path)
-    assert connection.execute("SELECT COUNT(*) FROM livro").fetchone()[0] == 5
+    assert connection.execute("SELECT COUNT(*) FROM livro").fetchone()[0] == 4
     assert connection.execute("SELECT COUNT(*) FROM usuario").fetchone()[0] == 2
     connection.close()
 
@@ -20,7 +20,7 @@ def test_seed_is_idempotent(tmp_path):
     seed_database(path)
     seed_database(path)
     connection = get_connection(path)
-    assert connection.execute("SELECT COUNT(*) FROM livro").fetchone()[0] == 5
+    assert connection.execute("SELECT COUNT(*) FROM livro").fetchone()[0] == 4
     connection.close()
 
 
