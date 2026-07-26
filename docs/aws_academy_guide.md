@@ -75,8 +75,8 @@ sudo systemctl enable --now docker
 Em seguida, clone o seu repositório Git ou baixe os arquivos da aplicação:
 
 ```bash
-# Substitua com a URL do seu repositório no GitHub
-git clone https://github.com/SEU_USUARIO/SEU_REPOSITORIO.git atividade_SD1
+
+git clone https://github.com/Lucasmota08/atividade_SD1 atividade_SD1
 cd atividade_SD1
 ```
 

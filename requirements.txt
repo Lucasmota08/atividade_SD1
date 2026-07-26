@@ -1,3 +1,4 @@
+# Necessários para rodar os testes
 PyJWT
 fastapi
 uvicorn
