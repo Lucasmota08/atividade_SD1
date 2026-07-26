@@ -6,4 +6,4 @@ def test_quickstart_references_existing_project_artifacts():
     assert (root / "docker-compose.yml").exists()
     assert (root / "README.md").exists()
     assert (root / "docs" / "architecture.md").exists()
-    assert "docker compose up" in (root / "specs" / "001-orb-digital-library" / "quickstart.md").read_text(encoding="utf-8")
+    assert "docker compose up" in (root / "README.md").read_text(encoding="utf-8")
