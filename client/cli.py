@@ -172,12 +172,12 @@ async def main() -> None:
                 print(f"\n❌ Erro ao listar empréstimos [{exc.code}]: {exc.message}")
 
         elif opcao == "6":
-            if not token:
+            if not token or not usuario_id:
                 print("\n⚠️ Você precisa se autenticar primeiro (Opção 1).")
                 continue
             loan_id = input("Digite o ID do Empréstimo a devolver: ").strip()
             try:
-                res = await emprestimo_stub.invoke_async("devolverLivro", loan_id, auth_token=token)
+                res = await emprestimo_stub.invoke_async("devolverLivro", loan_id, usuario_id=usuario_id, auth_token=token)
                 print(f"\n✅ Livro devolvido com sucesso! Status: {res.get('status')}")
             except ORBError as exc:
                 print(f"\n❌ Erro ao devolver livro [{exc.code}]: {exc.message}")

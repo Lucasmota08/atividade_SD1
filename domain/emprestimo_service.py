@@ -58,14 +58,16 @@ class EmprestimoService:
         finally:
             connection.close()
 
-    def devolverLivro(self, emprestimo_id: str) -> dict[str, Any]:
-        """Marca empréstimo como devolvido e restaura estoque uma vez."""
+    def devolverLivro(self, emprestimo_id: str, usuario_id: str | None = None) -> dict[str, Any]:
+        """Marca empréstimo como devolvido e restaura estoque uma vez, validando titular se informado."""
         connection = get_connection(self.db_path)
         try:
             connection.execute("BEGIN IMMEDIATE")
             loan = connection.execute("SELECT * FROM emprestimo WHERE id = ?", (emprestimo_id,)).fetchone()
             if loan is None:
                 raise ObjectNotFoundError(f"Empréstimo '{emprestimo_id}' não encontrado")
+            if usuario_id and loan["usuario_id"] != usuario_id:
+                raise ORBError("Este empréstimo não pertence a este usuário", code="LOAN_NOT_OWNED")
             if loan["status"] != "ativo":
                 raise ORBError("Empréstimo já devolvido", code="LOAN_ALREADY_RETURNED")
             connection.execute("UPDATE emprestimo SET status = 'devolvido' WHERE id = ? AND status = 'ativo'", (emprestimo_id,))
