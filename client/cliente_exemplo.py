@@ -17,7 +17,8 @@ async def run_demo() -> None:
     livros = Stub("LivroService", registry=registry)
     emprestimos = Stub("EmprestimoService", registry=registry)
     try:
-        token = await usuario.invoke_async("autenticar", "admin@gmail.com", "admin")
+        auth_res = await usuario.invoke_async("autenticar", "admin@gmail.com", "admin")
+        token = auth_res["token"] if isinstance(auth_res, dict) else auth_res
         print("Autenticado com sucesso")
         catalog = await livros.invoke_async("listarLivros", auth_token=token)
         print(f"Livros encontrados: {len(catalog)}")

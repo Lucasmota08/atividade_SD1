@@ -7,8 +7,10 @@ from orb_core.exceptions import AuthenticationError
 
 def test_user_authentication_and_invalid_credentials(database_path):
     service = UsuarioService(database_path)
-    token = service.autenticar("admin@gmail.com", "admin")
-    assert isinstance(token, str)
+    res = service.autenticar("admin@gmail.com", "admin")
+    assert isinstance(res, dict)
+    assert isinstance(res["token"], str)
+    assert res["usuario_id"] == "usuario-001"
     with pytest.raises(AuthenticationError):
         service.autenticar("admin@gmail.com", "wrong")
 

@@ -7,8 +7,6 @@ from datetime import datetime
 import os
 import sys
 
-import jwt
-
 from orb_core.exceptions import ORBError
 from orb_core.registry import RegistryClient
 from orb_core.stub import Stub
@@ -84,12 +82,16 @@ async def main() -> None:
                 email = input("Email: ").strip()
                 senha = input("Senha: ").strip()
                 try:
-                    token = await usuario_stub.invoke_async("autenticar", email, senha)
-                    payload = jwt.decode(token, options={"verify_signature": False})
-                    usuario_id = str(payload.get("sub", ""))
+                    auth_res = await usuario_stub.invoke_async("autenticar", email, senha)
+                    if isinstance(auth_res, dict):
+                        token = auth_res.get("token")
+                        usuario_id = auth_res.get("usuario_id")
+                    else:
+                        token = auth_res
+                        usuario_id = ""
                     print(f"\n✅ Login realizado com sucesso!")
                     print(f"   ID do Usuário: {usuario_id}")
-                    print(f"   Token JWT obtido: {token[:30]}...")
+                    print(f"   Token JWT obtido: {str(token)[:30]}...")
                 except ORBError as exc:
                     print(f"\n❌ Erro na autenticação [{exc.code}]: {exc.message}")
 
@@ -104,9 +106,13 @@ async def main() -> None:
                     print(f"   SEU ID DE USUÁRIO É: {new_id}")
                     # Inicia a sessão automaticamente com a conta criada
                     try:
-                        token = await usuario_stub.invoke_async("autenticar", email, senha)
-                        payload = jwt.decode(token, options={"verify_signature": False})
-                        usuario_id = str(payload.get("sub", new_id))
+                        auth_res = await usuario_stub.invoke_async("autenticar", email, senha)
+                        if isinstance(auth_res, dict):
+                            token = auth_res.get("token")
+                            usuario_id = auth_res.get("usuario_id", new_id)
+                        else:
+                            token = auth_res
+                            usuario_id = new_id
                         print(f"   ✅ Sessão iniciada automaticamente como [{usuario_id}]!")
                     except Exception:
                         pass

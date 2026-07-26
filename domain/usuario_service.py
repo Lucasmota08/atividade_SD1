@@ -62,14 +62,14 @@ class UsuarioService:
         finally:
             connection.close()
 
-    def autenticar(self, email: str, senha: str) -> str:
-        """Valida credenciais e emite JWT."""
+    def autenticar(self, email: str, senha: str) -> dict[str, str]:
+        """Valida credenciais e emite token JWT e ID do usuário."""
         connection = get_connection(self.db_path)
         try:
             row = connection.execute("SELECT id, senha_hash, status FROM usuario WHERE email = ?", (email,)).fetchone()
             if row is None or row["status"] != "ativo" or not hmac.compare_digest(row["senha_hash"], self._hash(senha)):
                 raise AuthenticationError("Email ou senha inválidos")
-            return gerar_token(row["id"])
+            return {"token": gerar_token(row["id"]), "usuario_id": row["id"]}
         finally:
             connection.close()
 

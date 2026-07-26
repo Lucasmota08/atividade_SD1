@@ -21,7 +21,8 @@ def test_end_to_end_remote_library_flow(tmp_path):
         port = server.sockets[0].getsockname()[1]
         try:
             user = Stub("UsuarioService", "127.0.0.1", port)
-            token = await user.invoke_async("autenticar", "admin@gmail.com", "admin")
+            auth_res = await user.invoke_async("autenticar", "admin@gmail.com", "admin")
+            token = auth_res["token"] if isinstance(auth_res, dict) else auth_res
             books = Stub("LivroService", "127.0.0.1", port)
             catalog = await books.invoke_async("listarLivros", auth_token=token)
             loan_stub = Stub("EmprestimoService", "127.0.0.1", port)

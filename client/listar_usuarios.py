@@ -31,7 +31,8 @@ async def main() -> None:
         email = os.getenv("ADMIN_EMAIL", "admin@gmail.com")
         senha = os.getenv("ADMIN_PASSWORD", "admin")
         
-        token = await usuario_stub.invoke_async("autenticar", email, senha)
+        auth_res = await usuario_stub.invoke_async("autenticar", email, senha)
+        token = auth_res["token"] if isinstance(auth_res, dict) else auth_res
         print("✅ Autenticação realizada com sucesso!")
 
         # Invoca o método remoto listarUsuarios

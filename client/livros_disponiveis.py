@@ -23,7 +23,8 @@ async def listar_livros_disponiveis() -> None:
     try:
         # Autenticação
         print("Autenticando...")
-        token = await usuario.invoke_async("autenticar", "admin@gmail.com", "admin")
+        auth_res = await usuario.invoke_async("autenticar", "admin@gmail.com", "admin")
+        token = auth_res["token"] if isinstance(auth_res, dict) else auth_res
         print("Autenticado com sucesso!")
         
         # Obter catálogo de livros
