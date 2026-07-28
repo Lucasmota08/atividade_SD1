@@ -29,7 +29,7 @@ def seed_database(db_path: str) -> None:
         for book_id, titulo, autor, isbn, copias in books:
             connection.execute(
                 "INSERT INTO livro(id, titulo, autor, isbn, copias_disponiveis) VALUES (?, ?, ?, ?, ?) "
-                "ON CONFLICT(id) DO UPDATE SET titulo=excluded.titulo, autor=excluded.autor, isbn=excluded.isbn, copias_disponiveis=excluded.copias_disponiveis",
+                "ON CONFLICT(id) DO NOTHING",
                 (book_id, titulo, autor, isbn, copias),
             )
         users = (("usuario-001", "Admin", "admin@gmail.com"), ("usuario-002", "Bruno", "bruno@example.com"))
@@ -37,7 +37,7 @@ def seed_database(db_path: str) -> None:
             senha = "admin" if email == "admin@gmail.com" else "senha123"
             connection.execute(
                 "INSERT INTO usuario(id, nome, email, senha_hash, status) VALUES (?, ?, ?, ?, 'ativo') "
-                "ON CONFLICT(id) DO UPDATE SET nome=excluded.nome, email=excluded.email, senha_hash=excluded.senha_hash",
+                "ON CONFLICT(id) DO NOTHING",
                 (user_id, name, email, hash_password(senha)),
             )
         connection.commit()
