@@ -64,7 +64,7 @@ timeout, retry, failover, API administrativa e o fluxo end-to-end.
 1. Execute `docker compose up --build`.
 2. Autentique pelo cliente e observe o JWT ser usado nas chamadas seguintes.
 3. Liste livros e consulte disponibilidade.
-4. Empreste um livro e liste os empréstimos ativos.
+4. Pegue um livro emprestado e liste os empréstimos ativos.
 5. Derrube um nó com `docker stop atividadeSD1-node_2-1` ou pelo nome exibido por `docker compose ps`.
 6. Repita a consulta: o outro nó continua respondendo.
 7. Pare ambos os nós para observar `CONNECTION_REFUSED` tratado.
